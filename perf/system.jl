@@ -34,7 +34,7 @@ for n = ns
 end
 
 using PyPlot; pygui(true)
-loglog(ns, 10.0^(-7)*ns.^2.*log.(ns), dashes=Any[10, 2], label=L"n^2 log(n)")
+loglog(ns, 10.0^(-7)*ns.^2.0.*log.(ns), dashes=Any[10, 2], label=L"n^2 log(n)")
 loglog(ns, 10.0^(-6)*ns.^2,           dashes=Any[2,  2], label=L"n^2")
 loglog(ns, tmin_a, ".-", label=L"aliased")
 loglog(ns, tmin_d, "o-", label=L"dealiased")

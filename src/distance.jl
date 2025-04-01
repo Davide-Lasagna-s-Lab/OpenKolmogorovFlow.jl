@@ -14,6 +14,7 @@ struct DistanceCache{nc, T, F<:Field{nc, T}, FT<:FTField{nc, nc, T}}
         
         # we want to index exact location for vertical integer
         # shifts, so grid size must be divisible by 4
+        # ! this condition contradicts the condition that nc should be even
         rem(M, 4) == 0 || error("cache size must be divisible by four")
         
         # store cross correlation of the two velocity fields

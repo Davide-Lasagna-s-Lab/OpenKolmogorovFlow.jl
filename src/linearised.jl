@@ -29,9 +29,9 @@ end
 # Outer constructor:
 function LinearisedExTerm(n::Int,
                           m::Int,
-                          mode::M,
+                           ::MODE,
                           ::Type{S}, flags::UInt32) where {S<:AbstractFloat,
-                                                   M<:AbstractLinearMode}
+                                                   MODE<:AbstractLinearMode}
     # stupidity check
     m ≥ n || throw(ArgumentError("`m` must be bigger than `n`"))
 
@@ -44,23 +44,23 @@ function LinearisedExTerm(n::Int,
      fft! = ForwardFFT!(  FCache[1], flags)
 
     # construct object
-    LinearisedExTerm{n, m, M, eltype(FTFCache), eltype(FCache),
+    LinearisedExTerm{n, m, MODE, eltype(FTFCache), eltype(FCache),
                                  typeof(ifft!), typeof(fft!)}(FTFCache,
                                                            FCache, ifft!, fft!)
 end
 
 # Callable
-function (eq::LinearisedExTerm{n, m, M})(t::Real,
+function (eq::LinearisedExTerm{n, m, MODE})(t::Real,
                                          Ω::FTField{n, m},
                                          Λ::FTField{n, m},
                                       dΛdt::FTField{n, m},
-                                       add::Bool=false) where {n, m, M}
+                                       add::Bool=false) where {n, m, MODE}
 
     # set mean to zero
     Λ[WaveNumber(0, 0)] = 0
     Ω[WaveNumber(0, 0)] = 0
 
-    if M <: TangentMode
+    if MODE <: TangentMode
             U,   V  = eq.FTFCache[1], eq.FTFCache[2]
            U′,   V′ = eq.FTFCache[3], eq.FTFCache[4]
          dΩdx, dΩdy = eq.FTFCache[5], eq.FTFCache[6]
@@ -92,7 +92,7 @@ function (eq::LinearisedExTerm{n, m, M})(t::Real,
         add == true ? (eq.fft!(U, u); dΛdt .+= U) : eq.fft!(dΛdt, u)
     end
 
-    if M <: AdjointMode
+    if MODE <: AdjointMode
                     U,    V    = eq.FTFCache[1], eq.FTFCache[2]
                     TMP1, TMP2 = eq.FTFCache[3], eq.FTFCache[4]
         dΛdx, dΛdy, dΩdx, dΩdy = eq.FTFCache[5], eq.FTFCache[6], eq.FTFCache[7], eq.FTFCache[8]

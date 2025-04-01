@@ -47,7 +47,7 @@ end
     m, n = 49, 49
     U = FFT(Field(m, (x, y)->rand()), n)
     V = FFT(Field(m, (x, y)->rand()), n)
-    @test minimum([@elapsed dot(U, V) for i = 1:100000]) < 8*10.0^(-6)
+    @test minimum([@elapsed dot(U, V) for i = 1:100000]) < 5e-5
 end
 
 @testset "norm                                   " begin

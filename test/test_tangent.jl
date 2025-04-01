@@ -17,7 +17,7 @@
     EX_nl, IM_nl = splitexim(ForwardEquation(n, m, Re, kforcing))
 
     # define integrator
-    ϕ = flow(EX_nl, IM_nl, CB3R2R3e(Ω, :NORMAL), TimeStepConstant(0.01))
+    ϕ = flow(EX_nl, IM_nl, CB3R2R3e(Ω, Flows.NormalMode()), TimeStepConstant(0.01))
 
     # Run for a while to land on attractor.
     ϕ(Ω, (0, 10))
@@ -44,7 +44,7 @@
     # define integrator
     ψ = flow(couple(EX_nl, EX_lin),
              couple(IM_nl, IM_lin),
-             CB3R2R3e(couple(Ω, Λ), :NORMAL),
+             CB3R2R3e(couple(Ω, Λ), Flows.NormalMode()),
              TimeStepConstant(0.01))
     
     # perturb mode (1, 1)

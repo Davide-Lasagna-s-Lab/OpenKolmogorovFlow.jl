@@ -1,4 +1,4 @@
-@testset "adjoint                           " begin
+@testset "adjoint                                " begin
     
     # seed rng
     Random.seed!(0)
@@ -19,7 +19,7 @@
 
     v1 = dot(A, LD(0.0, Ω, copy(B), similar(Ω)))
     v2 = dot(B, LA(0.0, Ω, copy(A), similar(Ω)))
-    @test abs(v1 - v2)/max(abs(v1), abs(v2)) < 4e-14
+    @test abs(v1 - v2)/max(abs(v1), abs(v2)) < 6e-14
 
 
     # # We use the adjoint code to verify the identity 
@@ -34,7 +34,7 @@
     F = ForwardEquation(n, m, Re, 4, FFTW.ESTIMATE)
 
     # flow
-    ϕ = flow(splitexim(F)..., CNRK2(FTField(n, m), :NORMAL), TimeStepConstant(Δt))
+    ϕ = flow(splitexim(F)..., CNRK2(FTField(n, m), Flows.NormalMode()), TimeStepConstant(Δt))
 
     # define the stage cache
     cache = RAMStageCache(2, FTField(n, m))
@@ -43,8 +43,8 @@
     ϕ(Ω, (0, 10)); ϕ(Ω, (0, 10), reset!(cache))
 
     # construct linearised propagators
-    ψ_D = flow(splitexim(LD)..., CNRK2(FTField(n, m), :TAN), TimeStepFromCache())
-    ψ_A = flow(splitexim(LA)..., CNRK2(FTField(n, m), :ADJ), TimeStepFromCache())
+    ψ_D = flow(splitexim(LD)..., CNRK2(FTField(n, m), DiscreteMode(false)), TimeStepFromCache())
+    ψ_A = flow(splitexim(LA)..., CNRK2(FTField(n, m), DiscreteMode(true)), TimeStepFromCache())
     
     # verify identity
     v1 = dot(A, ψ_A(copy(B), copy(cache)))

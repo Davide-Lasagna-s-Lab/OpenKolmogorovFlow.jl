@@ -1,4 +1,4 @@
-export shift!, xshift!, yshift!, yshiftreflect!
+export shift!, shiftrotate!, xshift!, yshift!, yshiftreflect!, rotate!
 
 function xshift!(U::FTField{n}, s::Real) where {n}
     (s == 0) && return U
@@ -37,4 +37,7 @@ function yshiftreflect!(U::FTField{n}) where {n}
     return U
 end
 
+rotate!(U::FTField) = map!(conj, U, U)
+
 shift!(U::FTField, s::Real, m::Int) = yshift!(xshift!(U, s), m)
+shiftrotate!(U::FTField, s::Real, m::Int) = rotate!(yshift!(xshift!(U, s), m))

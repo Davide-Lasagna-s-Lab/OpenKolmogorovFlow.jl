@@ -2,8 +2,9 @@
     n, m = 41, up_dealias_size(41)
     s, _m = 0.123, 3
     U = FFT(Field(m, (x, y) -> randn()), n)
-    V = shift!(copy(U), s, _m)
-    @test norm(U) ≈ norm(V)
+    V = shiftrotate!(copy(U), s, _m)
+    W = shift!(copy(U), s, _m)
+    @test norm(U) ≈ norm(V) ≈ norm(W)
 end
 
 @testset "shift cos right by π/2 get a sine      " begin
@@ -20,4 +21,12 @@ end
     Usin = FFT(Field(m, (x, y)->sin(y)), n)
 
     @test normdiff(Usin, yshift!(Ucos, -1)) < 1e-20
+end
+
+@testset "rotate by π                            " begin
+    n, m = 41, up_dealias_size(41)
+    U = FFT(Field(m, (x, y)->cos(y)*sin(x)),  n)
+    V = FFT(Field(m, (x, y)->-cos(y)*sin(x)), n)
+
+    @test normdiff(OpenKolmogorovFlow.rotate!(U), V) < 1e-20
 end

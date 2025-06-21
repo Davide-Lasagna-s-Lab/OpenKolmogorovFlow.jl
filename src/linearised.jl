@@ -1,3 +1,5 @@
+import Base.Threads: @spawn
+
 export LinearisedEquation,
        splitexim,
        TangentMode,
@@ -81,8 +83,10 @@ function (eq::LinearisedExTerm{n, m, MODE})(t::Real,
         invlaplacian!(V′, dΛdx)
 
         # inverse transform to physical space into temporaries
-        @threads for i = 1:8
-            eq.ifft!(eq.FCache[i], eq.FTFCache[i])
+        @sync for i in 1:8
+            @spawn begin
+                eq.ifft!(eq.FCache[i], eq.FTFCache[i])
+            end
         end
 
         # multiply in physical space, overwriting u, then come back
@@ -114,16 +118,20 @@ function (eq::LinearisedExTerm{n, m, MODE})(t::Real,
         invlaplacian!(V,  dΩdx)
 
         # inverse transform to physical space into temporaries
-        @threads for i in [1, 2, 5, 6, 7, 8]
-            eq.ifft!(eq.FCache[i], eq.FTFCache[i])
+        @sync for i in [1, 2, 5, 6, 7, 8]
+            @spawn begin
+                eq.ifft!(eq.FCache[i], eq.FTFCache[i])
+            end
         end
 
         # multiply in physical space
         tmp1 .= u.*dλdx .+ v.*dλdy
         tmp2 .= dλdx.*dωdy .- dλdy.*dωdx
 
-        @threads for i in [3, 4]
-            eq.fft!(eq.FTFCache[i], eq.FCache[i])
+        @sync for i in [3, 4]
+            @spawn begin
+                eq.fft!(eq.FTFCache[i], eq.FCache[i])
+            end
         end
 
         # add or replace

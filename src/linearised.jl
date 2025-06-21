@@ -81,7 +81,7 @@ function (eq::LinearisedExTerm{n, m, MODE})(t::Real,
         invlaplacian!(V′, dΛdx)
 
         # inverse transform to physical space into temporaries
-        @threads :static for i = 1:8
+        @threads for i = 1:8
             eq.ifft!(eq.FCache[i], eq.FTFCache[i])
         end
 
@@ -114,7 +114,7 @@ function (eq::LinearisedExTerm{n, m, MODE})(t::Real,
         invlaplacian!(V,  dΩdx)
 
         # inverse transform to physical space into temporaries
-        @threads :static for i in [1, 2, 5, 6, 7, 8]
+        @threads for i in [1, 2, 5, 6, 7, 8]
             eq.ifft!(eq.FCache[i], eq.FTFCache[i])
         end
 
@@ -122,7 +122,7 @@ function (eq::LinearisedExTerm{n, m, MODE})(t::Real,
         tmp1 .= u.*dλdx .+ v.*dλdy
         tmp2 .= dλdx.*dωdy .- dλdy.*dωdx
 
-        @threads :static for i in [3, 4]
+        @threads for i in [3, 4]
             eq.fft!(eq.FTFCache[i], eq.FCache[i])
         end
 

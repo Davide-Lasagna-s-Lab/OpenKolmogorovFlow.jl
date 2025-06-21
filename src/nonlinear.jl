@@ -53,7 +53,7 @@ function (Eq::ForwardExplicitTerm{n, m, FT})(t::Real,
     invlaplacian!(V, dΩdx)
 
     # inverse transform to physical space into temporaries
-    @threads :static for i = 1:4
+    @threads for i = 1:4
         Eq.ifft!(Eq.FCache[i], Eq.FTCache[i])
     end
 

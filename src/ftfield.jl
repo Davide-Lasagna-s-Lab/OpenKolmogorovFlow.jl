@@ -99,6 +99,7 @@ Base.parent(U::FTField) = U.data
 
 # allow constructing similar fields
 Base.similar(U::FTField{n, m, T}) where {n, m, T} = FTField(n, m, T)
+Base.zero(U::FTField) = similar(U)
 Base.copy(U::FTField) = (V = similar(U); V .= U; V)
 
 # ~~~ interpolate field to larger grid ~~~

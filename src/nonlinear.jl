@@ -59,8 +59,10 @@ function (Eq::ForwardExplicitTerm{n, m, FT})(t::Real,
         end
     end
 
-    # calculate β = Δx/u_max
-    Eq.β[1] = (π/(m+1))/max(maximum(u), maximum(v))
+    # calculate β = Δx/u_max. Use absolute velocity so large negative
+    # velocities constrain the CFL step just like positive ones.
+    u_max = max(maximum(abs, u), maximum(abs, v))
+    Eq.β[1] = iszero(u_max) ? Inf : (π/(m+1))/u_max
 
     # multiply in physical space. Overwrite u
     u  .= .- u.*dωdx .- v.*dωdy

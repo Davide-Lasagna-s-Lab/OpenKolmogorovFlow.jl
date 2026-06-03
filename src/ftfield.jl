@@ -109,7 +109,10 @@ Base.copy(U::FTField) = (V = similar(U); V .= U; V)
 
 # different size
 @inline function growto!(OUT::AbstractFTField{n, m}, U::AbstractFTField{p, q}) where {n, m, p, q}
-    q >= m && throw(ArgumentError("output `OUT` should be larger or equal than input `U`"))
+    m >= q ||
+        throw(ArgumentError("output storage size must be larger than or equal to input storage size"))
+    n >= p ||
+        throw(ArgumentError("output active wavenumber cutoff must be larger than or equal to input active cutoff"))
     @inbounds begin
         OUT .= 0
         for j = 0:p, k = -p:p

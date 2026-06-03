@@ -95,3 +95,31 @@ end
     @test typeof(V) == FTField{1, 2, Float64, Matrix{Complex{Float64}}}
     @test W[WaveNumber(0, 0)] == 1+2im
 end
+
+@testset "growto!                                " begin
+    U = FTField(1, 2)
+    U[WaveNumber( 0, 0)] = 1 + 2im
+    U[WaveNumber( 1, 0)] = 3 + 4im
+    U[WaveNumber(-1, 1)] = 5 + 6im
+
+    OUT = FTField(1, 3)
+    OUT .= 10 + 10im
+    @test growto!(OUT, U) === OUT
+    @test OUT[WaveNumber( 0, 0)] == U[WaveNumber( 0, 0)]
+    @test OUT[WaveNumber( 1, 0)] == U[WaveNumber( 1, 0)]
+    @test OUT[WaveNumber(-1, 1)] == U[WaveNumber(-1, 1)]
+    @test OUT[WaveNumber( 2, 0)] == 0
+    @test OUT[WaveNumber( 0, 2)] == 0
+
+    OUT = FTField(2, 2)
+    OUT .= 10 + 10im
+    growto!(OUT, U)
+    @test OUT[WaveNumber( 0, 0)] == U[WaveNumber( 0, 0)]
+    @test OUT[WaveNumber( 1, 0)] == U[WaveNumber( 1, 0)]
+    @test OUT[WaveNumber(-1, 1)] == U[WaveNumber(-1, 1)]
+    @test OUT[WaveNumber( 2, 0)] == 0
+    @test OUT[WaveNumber( 0, 2)] == 0
+
+    @test_throws ArgumentError growto!(FTField(2, 2), FTField(2, 3))
+    @test_throws ArgumentError growto!(FTField(1, 4), FTField(2, 3))
+end

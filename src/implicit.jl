@@ -6,6 +6,15 @@ import LinearAlgebra: mul!
 # ~~~ THE VISCOUS TERM OF THE GOVERNING EQUATIONS ~~~
 
 # allow changin the Reynolds number more easily
+"""
+    ImplicitTerm(Re)
+
+Viscous linear term for the vorticity equation.
+
+`mul!(OUT, ImplicitTerm(Re), U)` computes `ΔU / Re` in Fourier space. The type
+is mutable so continuation or parameter studies can adjust `Re` without
+rebuilding the whole equation object.
+"""
 mutable struct ImplicitTerm
     Re::Float64
 end

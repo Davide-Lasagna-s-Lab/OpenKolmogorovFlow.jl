@@ -4,13 +4,38 @@ export WaveNumber, @loop_jk, @loop_k
 # @inline _reindex(k::Int, j::Int, m::Int) = (ifelse(k≥0, k+1, 2m+3+k), j+1)
 @inline _reindex(k::Int, j::Int, m::Int) = (ifelse(k≥0, k, 2m+2+k), j)
 
-# allow indexing a specific wavenumber
+"""
+    WaveNumber(k, j)
+
+Fourier-mode identifier used for indexing [`FTField`](@ref).
+
+`k` is the signed wavenumber stored along the full complex FFT direction and
+`j` is the non-negative wavenumber stored along the real-to-complex FFT
+direction. Because the package stores an `rfft` half-plane, negative `j` modes
+are represented implicitly by Hermitian symmetry and are not valid indices.
+
+# Example
+
+```julia
+Ω = FTField(4, 6)
+Ω[WaveNumber(-2, 1)] = 1 + 2im
+```
+"""
 struct WaveNumber
     k::Int 
     j::Int 
 end
 
-# various macros used to simplify indexing
+"""
+    @loop_k n m expr
+
+Loop over the signed active `k` wavenumbers `-n:n` while exposing both `k`
+and the storage index `_k` inside `expr`.
+
+This macro is an internal convenience for allocation-free spectral loops. It
+keeps the signed wavenumber (`k`) available for formulas and the corresponding
+stored row (`_k`) available for direct [`FTField`](@ref) indexing.
+"""
 macro loop_k(n, m, expr)
     quote
         for $(esc(:k)) = 0:$(esc(n))
@@ -24,6 +49,15 @@ macro loop_k(n, m, expr)
     end
 end
 
+"""
+    @loop_jk n m expr
+
+Loop over all explicitly stored active Fourier modes.
+
+Inside `expr`, `j` and `k` are physical wavenumbers and `_j`, `_k` are their
+storage indices. The loop covers `j = 0:n` and `k = -n:n`, matching the
+package's active Fourier set.
+"""
 macro loop_jk(n, m, expr)
     quote
         @inbounds for $(esc(:j)) = 0:$(esc(n))

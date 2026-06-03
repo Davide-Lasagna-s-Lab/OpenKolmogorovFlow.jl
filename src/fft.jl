@@ -3,7 +3,8 @@ import FFTW: unsafe_execute!, plan_rfft, plan_brfft
 export FFT, IFFT, ForwardFFT!, InverseFFT!, up_dealias_size, down_dealias_size
 
 # ~~~ UTILS ~~~
-# set to zero Fourier coefficients
+# Set coefficients outside the active truncation to zero. This is the mask that
+# keeps dealiased storage modes from feeding back into the evolved active set.
 function _apply_mask(U::AbstractFTField{n, m, T}) where {n, m, T}
     @inbounds begin
         # middle block
@@ -24,7 +25,8 @@ function _apply_mask(U::AbstractFTField{n, m, T}) where {n, m, T}
     return U
 end
 
-# ensure field satisfies symmetry at all times
+# Enforce the Hermitian symmetry required on the rfft zero column. The rest of
+# the Hermitian half-plane is represented implicitly by FFTW's real transform.
 function _apply_symmetry(U::AbstractFTField{n, m, T}) where {n, m, T}
     @inbounds @simd for k = 1:m
         pos = U.data[k+1, 1]
@@ -37,15 +39,33 @@ function _apply_symmetry(U::AbstractFTField{n, m, T}) where {n, m, T}
     return U
 end
 
-# Return the smallest `m` that avoids aliasing on a `FTField{n, ⋅}`
+"""
+    up_dealias_size(n::Int) -> Int
+
+Return the storage cutoff `m` used for the 3/2-rule dealiased grid associated
+with active cutoff `n`.
+"""
 up_dealias_size(n::Int) = n + n>>1
 
-# Return the largest `n`that avoids aliasing on a `Field{m}`
+"""
+    down_dealias_size(m::Int) -> Int
+
+Return the largest active cutoff `n` whose 3/2-rule storage cutoff fits inside
+an existing physical-space storage cutoff `m`.
+"""
 down_dealias_size(m::Int) = findlast(n->(up_dealias_size(n) ≤ m), 1:m)
 
 # ~~~ NON ALLOCATING VERSION ~~~
 
-# forward transform
+"""
+    ForwardFFT!(u::AbstractField; flags=FFTW.EXHAUSTIVE)
+
+Reusable in-place forward FFT plan from [`Field`](@ref) to [`FTField`](@ref).
+
+Calling the plan writes Fourier coefficients into the supplied `FTField`,
+normalises by the number of physical grid points, applies the active-mode mask,
+and restores the stored Hermitian symmetry on the zero `j` column.
+"""
 struct ForwardFFT!{m, P}
     plan::P
     function ForwardFFT!(u::AbstractField{m}, flags=FFTW.EXHAUSTIVE) where {m}
@@ -60,7 +80,15 @@ end
         U .*= 1/(2m+2)^2; _apply_symmetry(_apply_mask(U)))
 
 
-# inverse transform
+"""
+    InverseFFT!(U::AbstractFTField; flags=FFTW.EXHAUSTIVE)
+
+Reusable in-place inverse FFT plan from [`FTField`](@ref) to [`Field`](@ref).
+
+The input Fourier field is masked before FFTW executes. This is appropriate for
+solver caches where inactive modes are scratch storage; callers that need to
+preserve every stored coefficient should pass a copy.
+"""
 struct InverseFFT!{m, P}
     plan::P
     function InverseFFT!(U::AbstractFTField{n, m}, flags=FFTW.EXHAUSTIVE) where {n, m}
@@ -74,7 +102,16 @@ end
     (unsafe_execute!(i.plan, parent(_apply_mask(U)), parent(u)); u)
 
 
-# ~~~ ALLOCATING VERSIONS ~~~
+"""
+    FFT(u::AbstractField, n::Int) -> FTField
+
+Allocate a Fourier field with active cutoff `n` and transform the physical
+field `u` into it.
+
+The storage cutoff is inherited from `u`, so `u::Field{m}` produces
+`FTField{n,m}`.
+"""
+function FFT end
 
 # We need copies because the plan destroys the input
 function FFT(u::AbstractField{m, T}, n::Int) where {m, T}
@@ -83,6 +120,13 @@ function FFT(u::AbstractField{m, T}, n::Int) where {m, T}
     return fun(FTField(n, m, T), v)
  end
 
+"""
+    IFFT(U::AbstractFTField) -> Field
+
+Allocate a physical-space field and inverse transform `U` into it.
+
+The returned field has the storage cutoff `m` of `U`.
+"""
 function IFFT(U::AbstractFTField{n, m, T}) where {n, m, T}
     V = copy(U)
     fun = InverseFFT!(V, FFTW.ESTIMATE); V .= U

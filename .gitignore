@@ -3,3 +3,4 @@ perf/indexing.jl
 perf/object.jl
 TODO
 Manifest.toml
+docs/build/

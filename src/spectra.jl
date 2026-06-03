@@ -1,5 +1,16 @@
 export radial_mean
 
+"""
+    radial_mean!(f, Ω, out, counts) -> out
+
+Compute a radial average of `f` applied to Fourier coefficients.
+
+`out[r]` accumulates the average over modes whose radius
+`sqrt(j^2 + k^2)` rounds to integer shell `r`. `counts` is a work vector used
+to store the number of modes in each shell. Both vectors are overwritten.
+"""
+function radial_mean! end
+
 # Calculate mean of function `f`, accepting a single complex number argument,
 # acting on the amplitudes of the Fourier coefficients. The vector `out` is 
 # overwritten such that the element `n` contains this information.
@@ -29,6 +40,13 @@ function radial_mean!(f, Ω::FTField{n, m}, out::Vector, counts::Vector{Int}) wh
     # average
     return out ./= counts
 end
+
+"""
+    radial_mean(f, Ω) -> Vector
+
+Allocating wrapper around [`radial_mean!`](@ref).
+"""
+function radial_mean end
 
 # Allocating version. Use this version, unless you already have buffers
 # of memory for the two work vector allocated.

@@ -4,6 +4,15 @@ using FFTW
 export ForwardEquation, splitexim
 
 # ~~~ Explicit Term of Forward Equations ~~~
+"""
+    ForwardExplicitTerm(n, m, kforcing, flags, T)
+
+Preallocated explicit nonlinear term for the forward vorticity equation.
+
+This object owns Fourier and physical work arrays, plus reusable FFT plans. It
+computes advection, updates the CFL estimate `β`, and adds the built-in
+Kolmogorov forcing modes.
+"""
 struct ForwardExplicitTerm{n, m, FT, F, ITT, FTT}
      FTCache::Vector{FT} # storage
       FCache::Vector{F}
@@ -44,11 +53,13 @@ function (Eq::ForwardExplicitTerm{n, m, FT})(t::Real,
     dΩdx, dΩdy, U, V = Eq.FTCache
     dωdx, dωdy, u, v = Eq.FCache
 
-    # obtain vorticity derivatives
+    # Work entirely spectrally until physical multiplication is unavoidable.
+    # These two temporaries become ∂ω/∂x and ∂ω/∂y after inverse transforms.
     ddx!(dΩdx, Ω)
     ddy!(dΩdy, Ω)
 
-    # obtain velocity components
+    # Recover velocity from vorticity using the streamfunction relation.
+    # U = -∂ψ/∂y and V = ∂ψ/∂x when Ω = Δψ.
     invlaplacian!(U, dΩdy); U .*= -1
     invlaplacian!(V, dΩdx)
 
@@ -64,7 +75,8 @@ function (Eq::ForwardExplicitTerm{n, m, FT})(t::Real,
     u_max = max(maximum(abs, u), maximum(abs, v))
     Eq.β[1] = iszero(u_max) ? Inf : (π/(m+1))/u_max
 
-    # multiply in physical space. Overwrite u
+    # Multiply in physical space. Reuse `u` as the nonlinear RHS buffer:
+    # -(u ∂xω + v ∂yω).
     u  .= .- u.*dωdx .- v.*dωdy
 
     # forward transform to Fourier space into destination
@@ -79,6 +91,16 @@ end
 
 
 # ~~~ SOLVER OBJECT FOR THE GOVERNING EQUATIONS ~~~
+"""
+    ForwardEquation(n, m, Re[, kforcing=4, flags=FFTW.EXHAUSTIVE,
+                    forcing=DummyForcing(n), T=Float64])
+
+Forward vorticity equation for open Kolmogorov flow.
+
+The equation combines the implicit viscous term, the explicit nonlinear
+advection and built-in Kolmogorov forcing, and an optional user-supplied
+forcing object. It follows the callable interface expected by `Flows.jl`.
+"""
 struct ForwardEquation{n, m, 
                        IT<:ImplicitTerm, 
                        ET<:ForwardExplicitTerm,
@@ -115,6 +137,14 @@ end
   
 
 # /// SPLIT EXPLICIT AND IMPLICIT PARTS ///
+"""
+    splitexim(eq::ForwardEquation) -> (explicit, implicit)
+
+Return the explicit and implicit pieces of a [`ForwardEquation`](@ref).
+
+The returned `explicit` closure has the signature expected by IMEX integrators
+in `Flows.jl`; the returned implicit term is the equation's [`ImplicitTerm`](@ref).
+"""
 function splitexim(eq::ForwardEquation{n, m}) where {n, m}
     function wrapper(t::Real,
                      Ω::FTField{n, m},

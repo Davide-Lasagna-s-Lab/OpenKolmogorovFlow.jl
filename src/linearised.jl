@@ -8,13 +8,38 @@ export LinearisedEquation,
 # This triggers a different evaluation of the linearised
 # operator, but the required software infrastructure is
 # the same in both cases.
+"""
+    AbstractLinearMode
+
+Marker supertype for choosing tangent or adjoint linearised dynamics.
+"""
 abstract type AbstractLinearMode end
 
+"""
+    TangentMode()
+
+Select the tangent linear equation about a supplied forward trajectory.
+"""
 struct TangentMode <: AbstractLinearMode end
+
+"""
+    AdjointMode()
+
+Select the adjoint linear equation associated with the package inner product.
+"""
 struct AdjointMode <: AbstractLinearMode end
 
 
 # ~~~ Explicit Term of Linearised Equations ~~~
+"""
+    LinearisedExTerm(n, m, mode, T, flags)
+
+Preallocated explicit term for tangent or adjoint vorticity dynamics.
+
+The `mode` argument is either [`TangentMode`](@ref) or [`AdjointMode`](@ref).
+The object owns all Fourier/physical work arrays required to evaluate the
+linearised nonlinear term without allocating in the main time-stepping loop.
+"""
 struct LinearisedExTerm{n,
                         m,
                         M<:AbstractLinearMode,
@@ -63,6 +88,9 @@ function (eq::LinearisedExTerm{n, m, MODE})(t::Real,
     Ω[WaveNumber(0, 0)] = 0
 
     if MODE <: TangentMode
+        # Tangent dynamics: differentiate both the base vorticity Ω and the
+        # perturbation Λ, recover their velocity fields, then form the
+        # linearised advection operator in physical space.
             U,   V  = eq.FTFCache[1], eq.FTFCache[2]
            U′,   V′ = eq.FTFCache[3], eq.FTFCache[4]
          dΩdx, dΩdy = eq.FTFCache[5], eq.FTFCache[6]
@@ -97,6 +125,9 @@ function (eq::LinearisedExTerm{n, m, MODE})(t::Real,
     end
 
     if MODE <: AdjointMode
+        # Continuous adjoint dynamics: compute the base velocity and gradients,
+        # transform only the fields needed for the adjoint products, then return
+        # to Fourier space for the final Helmholtz-style projection.
                     U,    V    = eq.FTFCache[1], eq.FTFCache[2]
                     TMP1, TMP2 = eq.FTFCache[3], eq.FTFCache[4]
         dΛdx, dΛdy, dΩdx, dΩdy = eq.FTFCache[5], eq.FTFCache[6], eq.FTFCache[7], eq.FTFCache[8]
@@ -150,6 +181,16 @@ end
 
 
 # ~~~ SOLVER OBJECT FOR THE LINEAR EQUATIONS ~~~
+"""
+    LinearisedEquation(n, m, Re, mode[, flags=FFTW.EXHAUSTIVE,
+                      forcing=DummyForcing(n), T=Float64])
+
+Tangent or adjoint linearised equation about a forward vorticity trajectory.
+
+`mode` selects whether the equation evolves perturbations forward in tangent
+form or adjoint variables backward/with adjoint integrators. The object follows
+the `Flows.jl` callable interface used by coupled and split IMEX integration.
+"""
 struct LinearisedEquation{n, m,
                           IT<:ImplicitTerm,
                           ET<:LinearisedExTerm{n, m},
@@ -177,6 +218,15 @@ end
 
 
 # /// SPLIT EXPLICIT AND IMPLICIT PARTS ///
+"""
+    splitexim(eq::LinearisedEquation) -> (explicit, implicit)
+
+Return explicit and implicit pieces for `Flows.jl` split integration.
+
+The returned explicit closure supports both the coupled tangent signature
+`(t, Ω, dΩdt, Λ, dΛdt, add)` and the adjoint-only signature
+`(t, Ω, Λ, dΛdt, add)`.
+"""
 function splitexim(eq::LinearisedEquation{n, m}) where {n, m}
     function wrapper(t::Real,
                      Ω::FTField{n, m},

@@ -1,10 +1,33 @@
 export Field, make_grid
 
+"""
+    AbstractField{m,T} <: AbstractMatrix{T}
+
+Abstract matrix-like representation of a real physical-space field.
+
+The type parameter `m` determines the uniform grid size `2m+2` in both
+periodic directions. Concrete fields are stored as ordinary matrices in the
+same orientation used by FFTW plans in this package.
+"""
 abstract type AbstractField{m, T} <: AbstractMatrix{T} end
 
 Base.size(f::AbstractField{m}) where {m} = (2m+2, 2m+2)
 Base.IndexStyle(::Type{<:AbstractField}) = Base.IndexLinear()
 
+"""
+    Field(data::AbstractMatrix{<:Real})
+    Field(m::Int, [T=Float64])
+    Field(m::Int, fun)
+
+Physical-space scalar field on the periodic square.
+
+`Field(data)` wraps a square, even-sized real matrix. The grid parameter is
+inferred from `size(data,1) == 2m+2`. `Field(m, T)` allocates a zero field, and
+`Field(m, fun)` evaluates `fun.(x, y)` on [`make_grid`](@ref).
+
+The object behaves as an `AbstractMatrix`; use `parent(u)` to access the
+underlying storage.
+"""
 struct Field{m, T<:Real, M<:AbstractMatrix{T}} <: AbstractField{m, T}
     data::M
     function Field(data::M) where {T<:Real, M<:AbstractMatrix{T}}
@@ -17,7 +40,6 @@ end
 # OUTER CONSTRUCTORS
 Field(m::Int, ::Type{T}=Float64) where {T} = Field(zeros(T, 2m+2, 2m+2))
 
-# provide function
 Field(m::Int, fun::Base.Callable) = Field(fun.(make_grid(m)...))
 
 function _checksize(data::AbstractMatrix{<:Real})
@@ -59,7 +81,15 @@ Base.parent(U::Field) = U.data
 Base.similar(u::Field{m, T}) where {m, T} = Field(m, T)
 Base.copy(u::Field{m, T}) where {m, T} = (v = similar(u); v .= u; v)
 
-# ~~~ GRID FUNCTIONALITY ~~~
+"""
+    make_grid(m::Int) -> (x, y)
+    make_grid(u::Field) -> (x, y)
+
+Return broadcastable coordinate arrays for the periodic square `[0, 2π)^2`.
+
+Both directions have `2m+2` points. The endpoint `2π` is omitted so periodic
+functions are sampled without duplicating the first point.
+"""
 function make_grid(m::Int)
     x = range(0, stop=2π, length=2m+3)[1:(2m+2)]
     return reshape(x, 1, 2m+2), reshape(x, 2m+2, 1)

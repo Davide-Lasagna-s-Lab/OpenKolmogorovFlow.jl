@@ -20,6 +20,7 @@ Documenter.makedocs(;
     pages=[
         "Home" => "index.md",
         "Manual" => [
+            "Getting Started" => "man/getting-started.md",
             "Assumptions" => "man/conventions.md",
             "Fields" => "man/fields.md",
             "Equations" => "man/equations.md",

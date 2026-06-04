@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/src/assets/logo.png" alt="OpenKolmogorovFlow.jl logo" width="360">
+  <img src="docs/src/assets/logo.svg" alt="OpenKolmogorovFlow.jl logo" width="640">
 </p>
 
 # OpenKolmogorovFlow.jl

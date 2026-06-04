@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 300" role="img" aria-labelledby="title desc">
+  <title id="title">OpenKolmogorovFlow.jl logo</title>
+  <desc id="desc">A Julia-colored vector logo for OpenKolmogorovFlow.jl showing periodic streamlines and vortices beside the package wordmark.</desc>
+  <defs>
+    <linearGradient id="panel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f6f8fb"/>
+    </linearGradient>
+    <linearGradient id="domain" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef3f8"/>
+    </linearGradient>
+    <linearGradient id="red-blue" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#cb3c33"/>
+      <stop offset="0.55" stop-color="#9558b2"/>
+      <stop offset="1" stop-color="#4063d8"/>
+    </linearGradient>
+    <linearGradient id="green-purple" x1="0" x2="1" y1="1" y2="0">
+      <stop offset="0" stop-color="#389826"/>
+      <stop offset="0.55" stop-color="#4063d8"/>
+      <stop offset="1" stop-color="#9558b2"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-20%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#172033" flood-opacity="0.14"/>
+    </filter>
+    <filter id="soft-glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="24" y="24" width="1032" height="252" rx="28" fill="url(#panel)" filter="url(#shadow)"/>
+
+  <g transform="translate(70 52)">
+    <rect x="0" y="0" width="340" height="196" rx="22" fill="url(#domain)" stroke="#d7dce6" stroke-width="4"/>
+
+    <g stroke="#dce2eb" stroke-width="2" stroke-linecap="round">
+      <line x1="28" y1="49" x2="312" y2="49"/>
+      <line x1="28" y1="98" x2="312" y2="98"/>
+      <line x1="28" y1="147" x2="312" y2="147"/>
+      <line x1="85" y1="22" x2="85" y2="174"/>
+      <line x1="170" y1="22" x2="170" y2="174"/>
+      <line x1="255" y1="22" x2="255" y2="174"/>
+    </g>
+
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 56 C60 22, 104 28, 142 65 S230 112, 318 62" stroke="#2f3441" stroke-width="5.5"/>
+      <path d="M22 94 C62 61, 107 68, 145 102 S229 148, 318 102" stroke="#2f3441" stroke-width="5.5"/>
+      <path d="M22 132 C62 99, 106 107, 144 140 S230 184, 318 140" stroke="#2f3441" stroke-width="5.5"/>
+      <path d="M30 41 C75 79, 112 120, 158 99 S239 35, 306 79" stroke="#8992a3" stroke-width="3" opacity="0.72"/>
+      <path d="M31 157 C79 119, 114 78, 158 99 S238 163, 307 119" stroke="#8992a3" stroke-width="3" opacity="0.72"/>
+      <path d="M46 98 C80 70, 108 64, 136 85 S192 130, 224 111 S278 82, 304 98" stroke="url(#red-blue)" stroke-width="6" opacity="0.88"/>
+      <path d="M46 98 C82 126, 109 132, 137 111 S191 66, 224 85 S278 114, 304 98" stroke="url(#green-purple)" stroke-width="6" opacity="0.88"/>
+    </g>
+
+    <g filter="url(#soft-glow)" opacity="0.22">
+      <circle cx="91" cy="70" r="34" fill="#cb3c33"/>
+      <circle cx="249" cy="126" r="34" fill="#4063d8"/>
+      <circle cx="91" cy="126" r="24" fill="#389826"/>
+      <circle cx="249" cy="70" r="24" fill="#9558b2"/>
+    </g>
+
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M70 70 C70 51, 91 42, 106 53 C122 65, 114 91, 94 93 C77 96, 64 82, 70 70" stroke="#cb3c33" stroke-width="6"/>
+      <path d="M271 126 C271 145, 250 154, 234 143 C218 131, 226 105, 246 103 C263 100, 276 114, 271 126" stroke="#4063d8" stroke-width="6"/>
+      <path d="M74 126 C74 111, 91 104, 103 113 C116 123, 110 142, 94 144 C80 146, 69 136, 74 126" stroke="#389826" stroke-width="5"/>
+      <path d="M266 70 C266 85, 249 92, 237 83 C224 73, 230 54, 246 52 C260 50, 271 60, 266 70" stroke="#9558b2" stroke-width="5"/>
+    </g>
+
+    <g stroke="#ffffff" stroke-width="3">
+      <circle cx="91" cy="70" r="10" fill="#cb3c33"/>
+      <circle cx="249" cy="126" r="10" fill="#4063d8"/>
+      <circle cx="91" cy="126" r="8" fill="#389826"/>
+      <circle cx="249" cy="70" r="8" fill="#9558b2"/>
+    </g>
+  </g>
+
+  <g transform="translate(454 78)">
+    <text x="0" y="52" font-family="Inter, Avenir, Helvetica, Arial, sans-serif" font-size="44" font-weight="800" fill="#242936" letter-spacing="0">OpenKolmogorovFlow.jl</text>
+    <text x="2" y="92" font-family="Inter, Avenir, Helvetica, Arial, sans-serif" font-size="22" font-weight="600" fill="#5c6475" letter-spacing="0">spectral Kolmogorov-flow operators</text>
+    <text x="2" y="122" font-family="Inter, Avenir, Helvetica, Arial, sans-serif" font-size="22" font-weight="600" fill="#5c6475" letter-spacing="0">for Flows.jl time integration</text>
+  </g>
+</svg>

@@ -4,7 +4,7 @@ CurrentModule = OpenKolmogorovFlow
 
 ```@raw html
 <p align="center">
-  <img src="assets/logo.png" alt="OpenKolmogorovFlow.jl logo" width="360">
+  <img src="assets/logo.svg" alt="OpenKolmogorovFlow.jl logo" width="640">
 </p>
 ```
 

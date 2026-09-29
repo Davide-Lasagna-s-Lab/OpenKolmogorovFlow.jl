@@ -12,7 +12,6 @@ The stored `rfft` half-plane is weighted so modes with implicit conjugate
 partners contribute twice, while the `j == 0` column contributes once. The mean
 mode correction avoids double counting `(0, 0)`.
 """
-# Inner product between two vorticity fields (Ω₁, Ω₂) with possible non-zero mean
 function dot(Ω₁::AbstractFTField{n, m, T}, Ω₂::AbstractFTField{n, m, T}) where {n, m, T}
     # we split the loop because different part carry different weight
     s = zero(T)
@@ -51,9 +50,8 @@ Two-norm of a Fourier-space vorticity field.
 
 Only `p == 2` is supported.
 """
-# The two norm of a field ||Ω|| = sqrt(inner(Ω, Ω))
-norm(Ω::AbstractFTField, n::Int=2) =
-    (n==2 || throw(ArgumentError("only the 2-norm is defined"));
+norm(Ω::AbstractFTField, p::Int=2) =
+    (p==2 || throw(ArgumentError("only the 2-norm is defined"));
     sqrt(dot(Ω, Ω)))
 
 

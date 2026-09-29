@@ -23,9 +23,9 @@
     end
 
     # test no allocations
-    @test (@allocated dissrate(Ω, 1.0)) == 16
+    @test (@allocated dissrate(Ω, 1.0)) == 0
 
     # warm up with int
     dissrate(Ω, 1)
-    @test (@allocated dissrate(Ω, 1)) == 16
+    @test (@allocated dissrate(Ω, 1)) == 0
 end

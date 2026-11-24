@@ -1,8 +1,6 @@
 # add method to this function
 import Flows
 
-import LinearAlgebra: mul!
-
 # ~~~ THE VISCOUS TERM OF THE GOVERNING EQUATIONS ~~~
 
 # allow changin the Reynolds number more easily
@@ -20,9 +18,9 @@ mutable struct ImplicitTerm
 end
 
 # Methods to satisfy the Flows interface
-mul!(OUT::FT,
-     L::ImplicitTerm, U::FT) where {FT<:AbstractFTField} =
-    (laplacian!(OUT, U); OUT .*= 1/L.Re; OUT)
+LinearAlgebra.mul!(OUT::FT,
+                     L::ImplicitTerm, U::FT) where {FT<:AbstractFTField} =
+                    (laplacian!(OUT, U); OUT .*= 1/L.Re; OUT)
 
 Flows.ImcA!(L::ImplicitTerm,
             c::Real,

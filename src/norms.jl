@@ -1,5 +1,3 @@
-import LinearAlgebra: dot, norm
-
 # Definitions of inner products, norms and distances
 export normdiff, minnormdiff
 
@@ -12,7 +10,7 @@ The stored `rfft` half-plane is weighted so modes with implicit conjugate
 partners contribute twice, while the `j == 0` column contributes once. The mean
 mode correction avoids double counting `(0, 0)`.
 """
-function dot(Ω₁::AbstractFTField{n, m, T}, Ω₂::AbstractFTField{n, m, T}) where {n, m, T}
+function LinearAlgebra.dot(Ω₁::AbstractFTField{n, m, T}, Ω₂::AbstractFTField{n, m, T}) where {n, m, T}
     # we split the loop because different part carry different weight
     s = zero(T)
     @inbounds for _j = 1:n
@@ -50,7 +48,7 @@ Two-norm of a Fourier-space vorticity field.
 
 Only `p == 2` is supported.
 """
-norm(Ω::AbstractFTField, p::Int=2) =
+LinearAlgebra.norm(Ω::AbstractFTField, p::Int=2) =
     (p==2 || throw(ArgumentError("only the 2-norm is defined"));
     sqrt(dot(Ω, Ω)))
 

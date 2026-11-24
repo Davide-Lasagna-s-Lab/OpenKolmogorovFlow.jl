@@ -2,6 +2,7 @@
 
 export DummyForcing,
        DissRateGradientForcing,
+       NormalisedDissRateGradientForcing,
        WaveNumberForcing,
        ReForcing,
        SteadyForcing
@@ -125,6 +126,28 @@ DissRateGradientForcing(n::Int, Re::Real) = DissRateGradientForcing{n}(Re)
                                 Λ::FT,
                              dΛdt::FT) where {n, FT<:AbstractFTField{n}} = 
     (dΛdt .-= 2.0.*Ω./f.Re; dΛdt)
+
+"""
+    NormalisedDissRateGradientForcing(n, Re)
+
+Adjoint forcing corresponding to the gradient of normalised dissipation
+rate.
+
+When called on an adjoint right-hand side, this subtracts `2Ω/Re/Dl`.
+"""
+struct NormalisedDissRateGradientForcing{n} <: AbstractForcing{n} 
+    Re::Float64
+    Dl::Float64
+end
+
+NormalisedDissRateGradientForcing(n::Int, Re::Real, Dl::Real) =
+    NormalisedDissRateGradientForcing{n}(Re, Dl)
+
+(f::NormalisedDissRateGradientForcing{n})(t::Real,
+                                          Ω::FT,
+                                          Λ::FT,
+                                       dΛdt::FT) where {n, FT<:AbstractFTField{n}} = 
+    (dΛdt .-= 2.0.*Ω./f.Re./f.Dl; dΛdt)
 
 # ////// FORCING FOR TANGENT EQUATION FOR PERTURBATION WRT TO RE //////
 """

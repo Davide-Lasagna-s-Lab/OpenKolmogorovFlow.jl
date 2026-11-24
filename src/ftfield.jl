@@ -2,6 +2,8 @@ export AbstractFTField,
        FTField,
        growto!
 
+# TODO: add broadcasting
+
 # ~~~ ABSTRACT TYPE FOR STRUCTURED, ARRAY-LIKE OBJECTS FROM FFT ~~~
 # The parameter n denotes the largest wave number that we allow
 # indexing on a grid with number of points equal to 2n+2. We do
@@ -129,7 +131,7 @@ Base.@propagate_inbounds Base.getindex(U::FTField, i::Int) =
 Base.parent(U::FTField) = U.data
 
 # allow constructing similar fields
-Base.similar(U::FTField{n, m, T}) where {n, m, T} = FTField(n, m, T)
+Base.similar(U::FTField{n, m, T}, ::Type{S}=T) where {n, m, T, S} = FTField(n, m, S)
 Base.zero(U::FTField) = similar(U)
 Base.copy(U::FTField) = (V = similar(U); V .= U; V)
 

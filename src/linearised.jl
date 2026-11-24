@@ -194,7 +194,7 @@ the `Flows.jl` callable interface used by coupled and split IMEX integration.
 struct LinearisedEquation{n, m,
                           IT<:ImplicitTerm,
                           ET<:LinearisedExTerm{n, m},
-                          G<:AbstractForcing{n}}
+                          G}
      imTerm::IT
      exTerm::ET
     forcing::G  # forcing for the linearised equations
@@ -206,7 +206,7 @@ function LinearisedEquation(n::Int,
                            Re::Real,
                          mode::AbstractLinearMode,
                         flags::UInt32=FFTW.EXHAUSTIVE,
-                      forcing::AbstractForcing=DummyForcing(n),
+                      forcing=DummyForcing(n),
                              ::Type{S}=Float64) where {S<:AbstractFloat}
     imTerm = ImplicitTerm(Re)
     exTerm = LinearisedExTerm(n, m, mode, S, flags)

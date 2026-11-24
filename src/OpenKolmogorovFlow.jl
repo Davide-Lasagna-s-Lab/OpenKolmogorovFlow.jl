@@ -17,6 +17,8 @@ time stepping can avoid transient allocations.
 """
 module OpenKolmogorovFlow
 
+using LinearAlgebra
+
 include("indexing.jl")
 include("ftfield.jl")
 include("field.jl")
